@@ -1,5 +1,11 @@
 <?php
 
+use App\Models\Product;
+use App\Models\User;
+use App\Models\Wishlist;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+
 /*
 |--------------------------------------------------------------------------
 | Model Factories
@@ -11,9 +17,24 @@
 |
 */
 
-$factory->define(App\User::class, function (Faker\Generator $faker) {
+$factory->define(User::class, function (Faker\Generator $faker) {
     return [
-        'name' => $faker->name,
-        'email' => $faker->email,
+        'name' => $faker->firstName,
+        'surname' => $faker->lastName,
+        'email' => $faker->unique()->safeEmail,
+        'password' => Hash::make('password'),
+        'token' => Str::random(64)
+    ];
+});
+
+$factory->define(Wishlist::class, function (Faker\Generator $faker) {
+    return [
+        'title' => $faker->words(3, true)
+    ];
+});
+
+$factory->define(Product::class, function (Faker\Generator $faker) {
+    return [
+        'title' => $faker->words(1, true)
     ];
 });
