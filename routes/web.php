@@ -27,5 +27,13 @@ $router->group(['middleware' => 'auth'], function () use($router) {
         $router->get('/',  ['uses' => 'WishlistController@show']);
         $router->put('/',  ['uses' => 'WishlistController@edit']);
         $router->delete('/',  ['uses' => 'WishlistController@delete']);
+        
+        $router->get('/product',  ['uses' => 'ProductController@list']);
+        $router->post('/product',  ['uses' => 'ProductController@create']);
+        $router->group(['prefix' => 'product/{id_product:[0-9]+}'], function () use ($router) {
+            $router->get('/',  ['uses' => 'ProductController@show']);
+            $router->put('/',  ['uses' => 'ProductController@edit']);
+            $router->delete('/',  ['uses' => 'ProductController@delete']);
+        });
     });
 });
