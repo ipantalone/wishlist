@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use App\Interfaces\RESTOperation;
 use Illuminate\Support\Facades\DB;
@@ -74,11 +73,53 @@ class WishlistController extends Controller implements RESTOperation
     
     public function edit($id_wishlist, Request $request)
     {
+        $wishlist = DB::table('wishlists')->where('id_user', Auth::user()->id_user)
+            ->where('id_wishlist', $id_wishlist)
+            ->exists();
 
+        if($wishlist) // La wishlist esiste ed è dell'utente loggato
+        {
+            $validator = Validator::make($request->all(), [
+                'title' => 'required|max:255'
+            ]);
+    
+            if ($validator->fails()) 
+            {
+                return response()->json($validator->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+            else
+            {
+                DB::table('wishlists')->where('id_user', Auth::user()->id_user)
+                    ->where('id_wishlist', $id_wishlist)
+                    ->update([
+                        'title' => $request->title
+                    ]);
+
+                return response(null, Response::HTTP_NO_CONTENT);
+            }
+        }
+        else // Non mi interessa se la wishlist esiste ma non è dell'utente corretto, quindi un problema di autorizzazioni, per l'utente è 404
+        {
+            return response(null, Response::HTTP_NOT_FOUND);
+        }
     }
 
     public function delete($id_wishlist)
     {
+        $wishlist = DB::table('wishlists')->where('id_user', Auth::user()->id_user)
+            ->where('id_wishlist', $id_wishlist)
+            ->exists();
 
+        if($wishlist) // La wishlist esiste ed è dell'utente loggato
+        {
+            DB::table('wishlists')->where('id_user', Auth::user()->id_user)
+                ->where('id_wishlist', $id_wishlist)
+                ->delete();
+            return response(null, Response::HTTP_NO_CONTENT);
+        }
+        else
+        {
+            return response(null, Response::HTTP_NOT_FOUND);
+        }
     }
 }

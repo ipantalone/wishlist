@@ -71,4 +71,39 @@ class WishlistTest extends TestCase
         $response = $this->actingAs($this->user)->call('GET', '/wishlist/0');
         $this->assertEquals(404, $response->status());
     }
+
+    public function testEdit_NotFound()
+    {
+        $this->generateUser();
+        $response = $this->actingAs($this->user)->call('PUT', '/wishlist/0');
+        $this->assertEquals(404, $response->status());
+    }
+
+    public function testEdit_WrongOwner()
+    {
+        $this->generateUser();
+        $wishlist = DB::table('wishlists')->where('id_user', '!=', 1)->first();
+        $response = $this->actingAs($this->user)->call('PUT', '/wishlist/' . $wishlist->id_wishlist);
+        $this->assertEquals(404, $response->status());
+    }
+
+    public function testEdit_MissingData()
+    {
+        $this->generateUser();
+        $wishlist = DB::table('wishlists')->where('id_user', 1)->first();
+        $response = $this->actingAs($this->user)->call('PUT', '/wishlist/' . $wishlist->id_wishlist);
+        $this->assertEquals(422, $response->status());
+    }
+
+    public function testEdit_Success()
+    {
+        $this->generateUser();
+        $text_unittest = Str::random(32);
+        $wishlist = DB::table('wishlists')->where('id_user', 1)->first();
+        $response = $this->actingAs($this->user)->call('PUT', '/wishlist/' . $wishlist->id_wishlist, [
+            'title' => $text_unittest
+        ]);
+        $this->assertEquals(204, $response->status());
+        $this->seeInDatabase('wishlists', ['title' => $text_unittest]);
+    }
 }
