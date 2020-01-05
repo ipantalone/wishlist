@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         'App\Console\Commands\KeyGenerateCommand',
         'App\Console\Commands\GetRandomAuthToken',
+        'App\Console\Commands\ExportCSV',
     ];
 
     /**
