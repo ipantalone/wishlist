@@ -40,6 +40,7 @@ class WishlistController extends Controller implements RESTOperation
     {
         $wishlists = DB::table('wishlists as w')->select('w.id_wishlist', 'w.title', DB::raw('count(p.id_product) as products'))
             ->leftJoin('products as p', 'p.id_wishlist', '=', 'w.id_wishlist')
+            ->groupBy('w.id_wishlist', 'w.title')
             // ->where('id_user', null) // TODO: inserire id user loggato
             ->get();
 
