@@ -19,9 +19,13 @@ $router->get('/', function () use ($router) {
     ]);
 });
 
-$router->get('wishlist',  ['uses' => 'WishlistController@list']);
-$router->post('wishlist',  ['uses' => 'WishlistController@create']);
+$router->group(['middleware' => 'auth'], function () use($router) {
 
-$router->group(['prefix' => 'wishlist/{id_wishlist:[0-9]+}'], function () use ($router) {
-    $router->get('/',  ['uses' => 'WishlistController@show']);
+    $router->get('wishlist',  ['uses' => 'WishlistController@list']);
+    $router->post('wishlist',  ['uses' => 'WishlistController@create']);
+
+    $router->group(['prefix' => 'wishlist/{id_wishlist:[0-9]+}'], function () use ($router) {
+        $router->get('/',  ['uses' => 'WishlistController@show']);
+    });
+
 });

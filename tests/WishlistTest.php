@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Laravel\Lumen\Testing\DatabaseMigrations;
@@ -9,16 +10,25 @@ class WishlistTest extends TestCase
 {
     use DatabaseTransactions;
 
+    private $user;
+
+    public function generateUser()
+    {
+        $this->user = User::find(1);
+    }
+
     public function testCreate_MissingData()
     {
-        $response = $this->call('POST', '/wishlist');
+        $this->generateUser();
+        $response = $this->actingAs($this->user)->call('POST', '/wishlist');
         $this->assertEquals(422, $response->status());
     }
 
     public function testCreate_Success()
     {
+        $this->generateUser();
         $text_unittest = Str::random(32);
-        $response = $this->call('POST', '/wishlist', [
+        $response = $this->actingAs($this->user)->call('POST', '/wishlist', [
             'title' => $text_unittest
         ]);
         $this->assertEquals(201, $response->status());
@@ -27,7 +37,8 @@ class WishlistTest extends TestCase
 
     public function testList()
     {
-        $response = $this->call('GET', '/wishlist');
+        $this->generateUser();
+        $response = $this->actingAs($this->user)->call('GET', '/wishlist');
         $this->assertEquals(200, $response->status());
 
         $this->seeJsonStructure([
@@ -42,8 +53,9 @@ class WishlistTest extends TestCase
 
     public function testShow_Exists()
     {
+        $this->generateUser();
         $data = DB::table('wishlists')->first(); // Prendo la prima wishlist disponibile
-        $response = $this->call('GET', '/wishlist/' . $data->id_wishlist);
+        $response = $this->actingAs($this->user)->call('GET', '/wishlist/' . $data->id_wishlist);
         $this->assertEquals(200, $response->status());
 
         $this->seeJsonStructure([
@@ -55,7 +67,8 @@ class WishlistTest extends TestCase
 
     public function testShow_NotExists()
     {
-        $response = $this->call('GET', '/wishlist/0');
+        $this->generateUser();
+        $response = $this->actingAs($this->user)->call('GET', '/wishlist/0');
         $this->assertEquals(404, $response->status());
     }
 }

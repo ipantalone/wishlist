@@ -6,6 +6,7 @@ use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use App\Interfaces\RESTOperation;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -28,7 +29,7 @@ class WishlistController extends Controller implements RESTOperation
         }
         else
         {
-            Wishlist::create(['title' => $request->title]);
+            Auth::user()->wishlists()->create(['title' => $request->title]);
             return response(null, Response::HTTP_CREATED);
         }
     }
@@ -41,7 +42,7 @@ class WishlistController extends Controller implements RESTOperation
         $wishlists = DB::table('wishlists as w')->select('w.id_wishlist', 'w.title', DB::raw('count(p.id_product) as products'))
             ->leftJoin('products as p', 'p.id_wishlist', '=', 'w.id_wishlist')
             ->groupBy('w.id_wishlist', 'w.title')
-            // ->where('id_user', null) // TODO: inserire id user loggato
+            ->where('id_user', Auth::user()->id_user)
             ->get();
 
         return response()->json([
@@ -54,7 +55,7 @@ class WishlistController extends Controller implements RESTOperation
     public function show($id_wishlist)
     {
         $wishlist = DB::table('wishlists')->select('id_wishlist', 'title')
-            // ->where('id_user', null) // TODO: inserire id user loggato
+            ->where('id_user', Auth::user()->id_user)
             ->where('id_wishlist', $id_wishlist)
             ->first();
 
