@@ -15,6 +15,12 @@ class WishlistTest extends TestCase
         $this->user = User::find(1);
     }
 
+    public function testCreate_Unauthorized()
+    {
+        $response = $this->call('POST', '/wishlist');
+        $this->assertEquals(401, $response->status());
+    }
+
     public function testCreate_MissingData()
     {
         $this->generateUser();
