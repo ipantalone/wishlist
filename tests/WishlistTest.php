@@ -8,8 +8,6 @@ use Laravel\Lumen\Testing\DatabaseTransactions;
 
 class WishlistTest extends TestCase
 {
-    use DatabaseTransactions;
-
     private $user;
 
     public function generateUser()
@@ -105,5 +103,20 @@ class WishlistTest extends TestCase
         ]);
         $this->assertEquals(204, $response->status());
         $this->seeInDatabase('wishlists', ['title' => $text_unittest]);
+    }
+
+    public function testDelete_Success()
+    {
+        $this->generateUser();
+        $wishlist = DB::table('wishlists')->where('id_user', 1)->latest()->first();
+        $response = $this->actingAs($this->user)->call('DELETE', '/wishlist/' . $wishlist->id_wishlist);
+        $this->assertEquals(204, $response->status());
+    }
+
+    public function testDelete_NotFound()
+    {
+        $this->generateUser();
+        $response = $this->actingAs($this->user)->call('DELETE', '/wishlist/0');
+        $this->assertEquals(404, $response->status());
     }
 }
