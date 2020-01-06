@@ -85,11 +85,62 @@ class ProductController extends Controller
     
     public function edit($id_wishlist, $id_product, Request $request)
     {
-        
+        $product = DB::table('products as p')
+            ->select('p.*')
+            ->join('wishlists as w', 'p.id_wishlist', 'w.id_wishlist')
+            ->where('w.id_user', Auth::user()->id_user)
+            ->where('p.id_wishlist', $id_wishlist)
+            ->where('p.id_product', $id_product)
+            ->first();
+
+        if(!is_null($product))
+        {
+            $validator = Validator::make($request->all(), [
+                'title' => 'required|max:255'
+            ]);
+    
+            if ($validator->fails()) 
+            {
+                return response()->json($validator->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+            else
+            {
+                DB::table('products')
+                    ->where('id_wishlist', $id_wishlist)
+                    ->where('id_product', $id_product)
+                    ->update([
+                        'title' => $request->title
+                    ]);
+
+                return response(null, Response::HTTP_NO_CONTENT);
+            }
+        }
+        else
+        {
+            return response(null, Response::HTTP_NOT_FOUND);
+        }
     }
 
     public function delete($id_wishlist, $id_product)
     {
-        
+        $product = DB::table('products as p')
+            ->join('wishlists as w', 'p.id_wishlist', 'w.id_wishlist')
+            ->where('w.id_user', Auth::user()->id_user)
+            ->where('p.id_wishlist', $id_wishlist)
+            ->where('p.id_product', $id_product)
+            ->exists();
+
+        if($product)
+        {
+            DB::table('products')
+                ->where('id_wishlist', $id_wishlist)
+                ->where('id_product', $id_product)
+                ->delete();
+            return response(null, Response::HTTP_NO_CONTENT);
+        }
+        else
+        {
+            return response(null, Response::HTTP_NOT_FOUND);
+        }
     }
 }
